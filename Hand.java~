@@ -1,0 +1,16 @@
+public class Hand{
+
+    public Hand(){}
+
+    public void placeBet(){}
+
+    public void evaluateHand(){}
+
+    public void hit(){}
+
+    public void stand(){}
+
+
+
+
+}

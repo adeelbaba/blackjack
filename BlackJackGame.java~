@@ -1,0 +1,288 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Scanner;
+
+/**
+ * Created by adeel on 4/16/14.
+ */
+public class BlackJackGame {
+    ArrayList<Card> deck = new ArrayList<Card>();
+    Player player = new Player(); //TODO fix initialization
+    Dealer dealer = new Dealer(); //TODO fix initialization
+    Scanner scan = new Scanner(System.in);
+    boolean isHandActive = true;
+    boolean isGame = true;
+
+
+    void initializeGame() {
+        getShuffledDeck();
+
+        System.out.println("Do you like to play a new Hand? (Y / N)");
+        isGame = scan.next().trim().equalsIgnoreCase("Y") ? true : false;
+
+        while (player.chips > 0 && deck.size() > 10 && isGame) {
+            placeBet();
+            distributeCards();
+
+            if (isHandActive) {
+                playGame();
+                evaluateHand();
+            }
+
+            System.out.println("Do you like to play a new Hand? (Y / N)");
+            isGame = scan.next().trim().equalsIgnoreCase("Y") ? true : false;
+            player.handValue=0;
+            dealer.handValue=0;
+
+        }
+
+        if (player.chips <= 0 || deck.size() < 10 || !isGame) {
+            System.out.println("Exiting the game!");
+        }
+    }
+
+    void placeBet() {
+        System.out.println("Place your bet in No. of Chips");
+        int bet = scan.nextInt();
+
+        while (bet == 0) {
+            System.out.println("Invalid Bet Amount! Place your bet in No. of Chips");
+            bet = scan.nextInt();
+        }
+
+        player.bet = bet;
+        player.chips -= bet;
+        System.out.println("Your bet on this hand " + player.bet + " No. of Chips remaining " + player.chips);
+
+    }
+
+    void distributeCards() {
+        player.hand.add(deck.remove(0));
+        dealer.hand.add(deck.remove(0));
+        player.hand.add(deck.remove(0));
+        dealer.hand.add(deck.remove(0));
+
+        dealer.faceUpCard = (Card) dealer.hand.get(0);
+
+        //Set Player's hand value
+        player.setHandValue();
+        dealer.setHandValue();
+
+        System.out.println("Dealer Hand ");
+        System.out.println("-------------");
+        System.out.println(dealer.faceUpCard);
+        System.out.println("-------------");
+        System.out.println("Player Hand ");
+        System.out.println("-------------");
+        System.out.println(player);
+        System.out.println("-------------");
+
+
+        // Check if Player has BlackJack
+        // TODO - should have a separate method
+
+        if (player.handValue == 21) {
+            System.out.println("Player BlackJack!");
+            // Move to Dealer right away!
+            System.out.println("Dealer Cards " + dealer);
+
+
+            // Push
+            if (dealer.handValue == 21) {
+                System.out.println("Dealer BlackJack as well!");
+
+                // Reset the Hand! Start a new Hand
+                ties(); //RENAME to push
+            } else {
+                evaluateHand();
+            }
+        }
+
+    }
+
+    void playGame() {
+        System.out.println("Press 1 to Stand!");
+        System.out.println("Press 2 to Hit!");
+        System.out.println("Press 0 to Exit");
+
+        int input = scan.nextInt();
+        while (input == 2) // must use multiple conditions here
+        {
+            //Add one more card from shuffledDeck to player's hand
+            //Update Hand count
+            //Show options again
+            //Scan the input
+            Card newCard = deck.remove(0);
+            System.out.println("New Card " + newCard);
+            player.hit(newCard);
+
+            System.out.println("--------------------------");
+            System.out.println(player);
+            System.out.println("--------------------------");
+
+            if (!isBusted()) {
+                System.out.println("Press 1 to Stand!");
+                System.out.println("Press 2 to Hit!");
+
+                input = scan.nextInt();
+            }
+            else {
+                evaluateHand();
+                input=3;
+            }
+        }
+
+        if (input == 1) {
+            //Player doesn't want any new cards. The value for his / her hand remains same.
+            //Now the Dealer should reveal his other card.
+            //Dealer should hit if dealerValue <= 17
+            System.out.println("--------------------------");
+            System.out.println("Dealer to reveal: " + dealer);
+            while (dealer.handValue < 17) {
+                Card newCard = deck.remove(0);
+                System.out.println("New Card " + newCard);
+                dealer.hit(newCard);
+                System.out.println("--------------------------");
+                System.out.println("Dealer cards: " + dealer);
+
+            }
+        }
+
+    }
+
+    boolean isBusted() {
+        if (player.handValue > 21) {
+            return true;
+        }
+        return false;
+    }
+
+    void evaluateHand() {
+        if (player.handValue > 21) {
+            System.out.println("Player Busted, Dealer wins hand!");
+            player.bet = 0;
+        } else if (dealer.handValue > 21) {
+            System.out.println("Dealer Busted, Player wins hand!");
+            player.chips += player.bet + player.bet;
+        } else if (player.handValue > dealer.handValue && player.handValue <= 21) {
+            System.out.println("Player wins hand!");
+            player.chips += player.bet + player.bet;
+        } else {
+            System.out.println("Dealer wins hand!");
+            player.bet = 0;
+        }
+
+        isHandActive = false;
+
+        player.hand = new ArrayList<Card>();
+
+        dealer.hand = new ArrayList<Card>();
+
+        // evaluate if chips <=0
+        // evaluate if deck size < 10
+
+        // move to next hand
+
+    }
+
+    void ties() {
+        isHandActive = false;
+        System.out.println("Hand Tied");
+        player.chips += player.bet;
+        player.bet = 0;
+        player.hand = new ArrayList<Card>();
+
+        dealer.hand = new ArrayList<Card>();
+    }
+
+    public void getShuffledDeck() {
+        deck.addAll(getNewDeck());
+        Collections.shuffle(deck);
+        //printDeck(deck);
+    }
+
+    ArrayList<Card> getNewDeck() {
+        String color1 = "Spade";
+        String color2 = "Diamond";
+        String color3 = "Hearts";
+        String color4 = "Clubs";
+        ArrayList<Card> d = new ArrayList<Card>();
+
+        // Initialize Spade cards and add to deck
+        Card c;
+        for (int i = 2; i < 11; i++) {
+            c = new Card(i, new Integer(i).toString(), color1);
+            d.add(c);
+        }
+
+        c = new Card(10, "Jack", color1);
+        d.add(c);
+        c = new Card(10, "Queen", color1);
+        d.add(c);
+        c = new Card(10, "King", color1);
+        d.add(c);
+        c = new Card(11, "Ace", color1);
+        d.add(c);
+
+
+        // Initialize Diamond cards and add to deck
+        for (int i = 2; i < 11; i++) {
+            c = new Card(i, new Integer(i).toString(), color2);
+            d.add(c);
+        }
+
+        c = new Card(10, "Jack", color2);
+        d.add(c);
+        c = new Card(10, "Queen", color2);
+        d.add(c);
+        c = new Card(10, "King", color2);
+        d.add(c);
+        c = new Card(11, "Ace", color2);
+        d.add(c);
+
+        // Initialize Hearts cards and add to deck
+        for (int i = 2; i < 11; i++) {
+            c = new Card(i, new Integer(i).toString(), color3);
+            d.add(c);
+        }
+
+        c = new Card(10, "Jack", color3);
+        d.add(c);
+        c = new Card(10, "Queen", color3);
+        d.add(c);
+        c = new Card(10, "King", color3);
+        d.add(c);
+        c = new Card(11, "Ace", color3);
+        d.add(c);
+
+        // Initialize Club cards and add to deck
+        for (int i = 2; i < 11; i++) {
+            c = new Card(i, new Integer(i).toString(), color4);
+            d.add(c);
+        }
+
+        c = new Card(10, "Jack", color4);
+        d.add(c);
+        c = new Card(10, "Queen", color4);
+        d.add(c);
+        c = new Card(10, "King", color4);
+        d.add(c);
+        c = new Card(11, "Ace", color4);
+        d.add(c);
+
+        //System.out.println("d size " + d.size());
+        //printDeck(d);
+        return d;
+    }
+
+    void printDeck(ArrayList<Card> d) {
+        for (Iterator it = d.iterator(); it.hasNext(); ) {
+
+            Card c = (Card) it.next();
+            System.out.println(c.toString());
+        }
+
+    }
+
+}
