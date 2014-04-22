@@ -27,10 +27,11 @@ import java.util.Scanner;
  * - Hit
  * - Stand &
  * - Split (Single Level): Kindly see comments on Player class. The structure used here
- * doesn't allow for multiple level splitting. However, I might add another version to demonstrate
- * how multiple level split can be implemented.
- *
+ * doesn't allow for multiple level splitting.
+ * <p/>
  * - Also note that the BlackJack results in twice the bet and not 3:2 payout
+ *
+ * Note that if the player stands at a handValue of 21, he will still be given options to Hit or Stand
  */
 
 public class BlackJack {
@@ -286,8 +287,10 @@ public class BlackJack {
         // Give player options
         int input = giveHandOptions(hand);
 
-        // If player wanted to hit
+        // If player wants to hit
         // Remove card from deck and call playerHand.hit
+        // Note that if the player stands at a handValue of
+        // 21, he will still be given options to Hit or Stand
         while (input == HandOptions.HIT.getValue()) {
             Card newCard = deck.remove(0);
             hand.hit(newCard);
@@ -369,7 +372,7 @@ public class BlackJack {
     /**
      * Evaluate who won the hand
      * whether it was a blackjack, tie, bust or comparison of hand value
-     *
+     * <p/>
      * Player winning a hand is matched by his bet amount i.e. the player
      * wins 2 * bet every time they win a hand
      *
