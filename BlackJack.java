@@ -29,6 +29,8 @@ import java.util.Scanner;
  * - Split (Single Level): Kindly see comments on Player class. The structure used here
  * doesn't allow for multiple level splitting. However, I might add another version to demonstrate
  * how multiple level split can be implemented.
+ *
+ * - Also note that the BlackJack results in twice the bet and not 3:2 payout
  */
 
 public class BlackJack {
@@ -167,6 +169,9 @@ public class BlackJack {
     }
 
     void exitGame() {
+        if (player.getChips() <= 0) {
+            System.out.println("Sorry! you are out of chips.");
+        }
         System.out.println("Exiting the game!");
         player.printPlayer();
     }
@@ -175,8 +180,7 @@ public class BlackJack {
      * Ask the player to place the bet and check if the input is valid.
      */
     void placeBet() {
-        System.out.println("================================================");
-
+        System.out.println("======================================================================");
         System.out.print(" You have " + player.getChips() + " chips available \n");
         System.out.print(" Please place your bet (No. of Chips): ");
 
@@ -200,8 +204,7 @@ public class BlackJack {
         playerHand.setBet(bet);
         player.setChips(player.getChips() - bet);
         System.out.println(" Your Bet is: " + bet + " Chips & you have " + player.getChips() + " Chips remaining ");
-        System.out.println("================================================");
-
+        System.out.println("======================================================================");
     }
 
 
@@ -213,8 +216,6 @@ public class BlackJack {
     void distributeCards() {
 
         playerHand.addCard(deck.remove(0));
-        //playerHand.addCard(new Card(Suit.CLUBS, CardType.SEVEN));
-        //playerHand.addCard(new Card(Suit.HEARTS, CardType.SEVEN));
         dealerHand.addCard(deck.remove(0));
         playerHand.addCard(deck.remove(0));
         dealerHand.addCard(deck.remove(0));
@@ -345,13 +346,10 @@ public class BlackJack {
 
         splitHand = player.initializeSplitHand();
         splitHand.addCard(playerHand.removeCard(1));
-        //PlayerHand playerSubHand = new PlayerHand(playerHand.getBet(), true);
-        //playerSubHand.addCard(playerHand.removeCard(1));
 
         // draw cards from the deck for each hand 
         playerHand.addCard(deck.remove(0));
         splitHand.addCard(deck.remove(0));
-        //playerSubHand.addCard(deck.remove(0));
 
         //playerHand.setPlayerSplitHand(playerSubHand);
         playerHand.setSplit(true);
@@ -371,6 +369,9 @@ public class BlackJack {
     /**
      * Evaluate who won the hand
      * whether it was a blackjack, tie, bust or comparison of hand value
+     *
+     * Player winning a hand is matched by his bet amount i.e. the player
+     * wins 2 * bet every time they win a hand
      *
      * @param hand the player hand that needs to be evaluated
      */
