@@ -13,6 +13,7 @@ Main class is Game which is just an entry point and calls on BlackJack.startGame
 
 For more details, please look at the comments provided with the code.
 
-The repository also contains a .jar which will run the program once executed.
+The repository also contains a blackjack.jar which will run the program once executed.
+
 
 
